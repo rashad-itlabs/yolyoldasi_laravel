@@ -1,0 +1,29 @@
+# Gizli məlumatlar — repo public-dir, bunlar heç vaxt commit olunmamalıdır
+/.env
+/.env.*
+!/.env.example
+/.vscode/sftp.json
+/.claude/
+
+# Laravel
+/vendor/
+/node_modules/
+/public/hot
+/public/storage
+/public/build
+/storage/*.key
+/storage/pail
+/bootstrap/cache/*.php
+/.phpunit.cache
+/.phpunit.result.cache
+/auth.json
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+
+# Redaktor / OS
+/.idea
+/.fleet
+/.zed
+.DS_Store
