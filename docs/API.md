@@ -644,6 +644,13 @@ Səhifədə 50, **ən yenidən köhnəyə** sıralı. Çat ekranında siyahını
 Oxunmamış sayğacı sıfırlayır və qarşı tərəfin mesajlarına `read_at` qoyur.
 Çat ekranı açılanda çağır.
 
+Həmin söhbətin oxunmamış `newMessage` bildirişlərini də oxunmuş edir (§13):
+hər mesaj alıcıya həm söhbət sayğacını artırır, həm də bildiriş sətri yazır.
+Digər növlərə (rezervasiya, səfər, admin) toxunmur. Uğurlu cavabdan sonra
+klient hər iki sayğacı — `/conversations/unread-count` və
+`/notifications/unread-count` — yenidən oxumalıdır, yoxsa zəngdəki rəqəm
+köhnə qalır.
+
 ### GET `/conversations/unread-count`
 `{ "unread_total": 5 }` — naviqasiyadakı nişan üçün.
 
@@ -695,6 +702,12 @@ müəyyən edir — `target` və rol avtomatik təyin olunur.
 | GET | `/notifications/unread-count` | `{"unread_total": 3}` |
 | POST | `/notifications/{id}/read` | biri oxundu |
 | POST | `/notifications/read-all` | hamısı oxundu |
+
+`unread-count` bütün oxunmamış sətirləri sayır, `newMessage` də daxil. Bu növ
+bildiriş öz `read` çağırışı olmadan da oxunmuş olur: söhbət açılanda gedən
+`POST /conversations/{id}/read` (§11) həmin söhbətin `newMessage` sətirlərinə
+də `read_at` qoyur. Yəni mesajları oxumaq zəngdəki rəqəmi də azaldır — klient
+həmin çağırışdan sonra bu sayğacı yenidən oxumalıdır.
 
 ```json
 { "data": [{
