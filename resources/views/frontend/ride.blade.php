@@ -3,7 +3,8 @@
 @php
   // Soyad qısaldılır: link açıq internetdədir və istənilən qrupa düşə bilər.
   // Tətbiqin içində tam ad görünür, burada isə "Rəşad M." kifayətdir.
-  $parts   = preg_split('/\s+/', trim((string) $ride->driver->full_name)) ?: [];
+  // `driver` null ola bilər — hesab silinib. Onda ad əvəzinə "Sürücü" yazılır.
+  $parts   = preg_split('/\s+/', trim((string) $ride->driver?->full_name)) ?: [];
   $driver  = count($parts) > 1
       ? $parts[0].' '.mb_strtoupper(mb_substr(end($parts), 0, 1)).'.'
       : ($parts[0] ?? 'Sürücü');
@@ -13,9 +14,9 @@
   $price   = rtrim(rtrim(number_format((float) $ride->price_per_seat, 2, '.', ''), '0'), '.');
   // `stats` sətri olmaya bilər (çox köhnə hesab) — `?->` olmadan bu sətir
   // səhifəni tamamilə sındırardı.
-  $rating  = (float) ($ride->driver->stats?->driver_rating ?? 0);
-  $trips   = (int) ($ride->driver->stats?->driver_trip_count ?? 0);
-  $verified = $ride->driver->driverProfile?->status === 'approved';
+  $rating  = (float) ($ride->driver?->stats?->driver_rating ?? 0);
+  $trips   = (int) ($ride->driver?->stats?->driver_trip_count ?? 0);
+  $verified = $ride->driver?->driverProfile?->status === 'approved';
 @endphp
 
 @section('meta_title', e($route.' — '.$when.' | Yol Yoldaşı'))

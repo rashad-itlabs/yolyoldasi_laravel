@@ -24,7 +24,11 @@ class DriverController extends Controller
         $filters = $request->only(['q', 'status']);
         $status  = $filters['status'] ?? 'pending';
 
+        // Hesab silinəndə (soft delete) sürücü profili qalır — bərpa olunanda
+        // geri gəlsin deyə. Siyahıda isə görünməməlidir: `user` null olur və
+        // sətrə klik 500 verirdi. `whereHas` SoftDeletes scope-una hörmət edir.
         $profiles = DriverProfile::query()
+            ->whereHas('user')
             ->with(['user', 'vehicle'])
             ->withCount('documents')
             ->when($status !== 'all', fn ($query) => $query->where('status', $status))
@@ -37,7 +41,8 @@ class DriverController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        $counts = DriverProfile::selectRaw('status, COUNT(*) c')
+        $counts = DriverProfile::whereHas('user')
+            ->selectRaw('status, COUNT(*) c')
             ->groupBy('status')
             ->pluck('c', 'status');
 
@@ -47,6 +52,13 @@ class DriverController extends Controller
     public function show(DriverProfile $driver)
     {
         $driver->load(['user.stats', 'user.city', 'vehicle', 'documents']);
+
+        // Köhnə link və ya jurnaldan gələn keçid: hesab silinib. İstifadəçi
+        // səhifəsi silinmiş hesabı göstərir və bərpa düyməsi oradadır.
+        if (! $driver->user) {
+            return redirect()->route('admin.users.show', $driver->user_id)
+                ->withErrors(['driver' => 'Bu sürücünün hesabı silinib. Bərpa etsəniz, sürücü profili də geri qayıdacaq.']);
+        }
 
         // Şəxsiyyət sənədlərinə baxış izlənilir. Qeyd səhifə açılanda bir dəfə
         // yazılır — hər şəkil sorğusunda yazsaydıq, jurnal önizləmələrlə dolardı.
