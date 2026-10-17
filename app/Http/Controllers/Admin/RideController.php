@@ -13,6 +13,7 @@ use App\Models\Ride;
 use App\Models\UserStat;
 use App\Services\NotificationService;
 use App\Services\ReviewService;
+use App\Support\LocalTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -39,8 +40,9 @@ class RideController extends Controller
             ->when($filters['status'] ?? null, fn ($query, $s) => $query->where('status', $s))
             ->when($filters['from_city_id'] ?? null, fn ($query, $c) => $query->where('from_city_id', $c))
             ->when($filters['to_city_id'] ?? null, fn ($query, $c) => $query->where('to_city_id', $c))
-            ->when($filters['date_from'] ?? null, fn ($query, $d) => $query->whereDate('departure_at', '>=', $d))
-            ->when($filters['date_to'] ?? null, fn ($query, $d) => $query->whereDate('departure_at', '<=', $d))
+            // Admin tarixi Bakı günü kimi seçir (bax `LocalTime::dayRange`).
+            ->when($filters['date_from'] ?? null, fn ($query, $d) => $query->where('departure_at', '>=', LocalTime::dayRange($d)[0]))
+            ->when($filters['date_to'] ?? null, fn ($query, $d) => $query->where('departure_at', '<=', LocalTime::dayRange($d)[1]))
             ->latest('departure_at')
             ->paginate(25)
             ->withQueryString();

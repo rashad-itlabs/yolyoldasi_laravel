@@ -56,6 +56,9 @@ class ReviewController extends Controller
     {
         abort_if($user->is_blocked, 404);
 
-        return new UserBriefResource($user->load('stats'));
+        // `driverProfile` də yüklənir: onsuz `is_verified` və `is_pro` açarları
+        // cavabda olmur (§16.5) və ictimai profil — PRO nişanının vəd olunduğu
+        // yerlərdən biri — sürücünü nişansız göstərərdi.
+        return new UserBriefResource($user->load(['stats', 'driverProfile']));
     }
 }

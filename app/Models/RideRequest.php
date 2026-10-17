@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\LocalTime;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -63,9 +64,8 @@ class RideRequest extends Model
      */
     public function dateRange(): array
     {
-        return [
-            $this->wanted_date->copy()->subDays($this->flexible_days)->startOfDay(),
-            $this->wanted_date->copy()->addDays($this->flexible_days)->endOfDay(),
-        ];
+        // Sərnişinin seçdiyi tarix Bakı günüdür — sərhədləri də Bakı saatı ilə,
+        // UTC-də ifadə olunub (bax `LocalTime::dayRange`).
+        return LocalTime::dayRange($this->wanted_date->toDateString(), $this->flexible_days);
     }
 }

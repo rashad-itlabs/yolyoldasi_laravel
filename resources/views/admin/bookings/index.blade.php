@@ -49,7 +49,7 @@
               <td>@include('admin.partials.user', ['user' => $booking->driver])</td>
               <td>
                 <strong>{{ $booking->ride?->fromCity?->name }} → {{ $booking->ride?->toCity?->name }}</strong>
-                <div class="muted small">{{ $booking->ride?->departure_at?->format('d.m.Y H:i') }}</div>
+                <div class="muted small">{{ $booking->ride?->departureLocal()?->format('d.m.Y H:i') }}</div>
               </td>
               <td class="num">{{ $booking->seats }}</td>
               <td class="num nowrap">{{ number_format((float) $booking->total_price, 2) }} ₼</td>

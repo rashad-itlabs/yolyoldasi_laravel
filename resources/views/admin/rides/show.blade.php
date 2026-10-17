@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('title', 'Səfər #'.$ride->id)
-@section('subtitle', $ride->fromCity?->name.' → '.$ride->toCity?->name.' · '.$ride->departure_at?->format('d.m.Y H:i'))
+@section('subtitle', $ride->fromCity?->name.' → '.$ride->toCity?->name.' · '.$ride->departureLocal()?->format('d.m.Y H:i'))
 
 @section('actions')
   <a href="{{ route('admin.rides.index') }}" class="btn btn--ghost btn--sm">Siyahıya qayıt</a>
@@ -74,7 +74,7 @@
         <div class="card__body">
           <dl class="rows">
             <div class="row"><dt>Marşrut</dt><dd><strong>{{ $ride->fromCity?->name }} → {{ $ride->toCity?->name }}</strong></dd></div>
-            <div class="row"><dt>Yola düşmə</dt><dd>{{ $ride->departure_at?->format('d.m.Y H:i') }}</dd></div>
+            <div class="row"><dt>Yola düşmə</dt><dd>{{ $ride->departureLocal()?->format('d.m.Y H:i') }}</dd></div>
             <div class="row"><dt>Yer</dt><dd>{{ $ride->booked_seats }} / {{ $ride->total_seats }} dolu</dd></div>
             <div class="row"><dt>Qiymət</dt><dd>{{ number_format((float) $ride->price_per_seat, 2) }} ₼ / yer</dd></div>
             <div class="row"><dt>Ani rezervasiya</dt><dd>{{ $ride->instant_booking ? 'Açıq' : 'Bağlı' }}</dd></div>

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Ride;
 use App\Models\RideRequest;
+use App\Support\LocalTime;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -41,7 +42,8 @@ class RideMatchService
             return 0;
         }
 
-        $date = $ride->departure_at->toDateString();
+        // Tələb elanının tarixi Bakı günüdür; müqayisə də Bakı günü ilə.
+        $date = LocalTime::toLocal($ride->departure_at)->toDateString();
 
         $requests = RideRequest::query()
             ->open()
@@ -147,7 +149,9 @@ class RideMatchService
             ->where('driver_id', '!=', $request->user_id)
             ->whereBetween('departure_at', [$from, $to])
             ->whereRaw('total_seats - booked_seats >= ?', [$request->seats])
-            ->with(['driver.stats', 'vehicle', 'fromCity', 'toCity'])
+            // `driver.driverProfile` — `RideController::RELATIONS` ilə eyni: bu
+            // siyahı PRO-nu öndə sıralayır, nişanı da göstərməlidir.
+            ->with(['driver.stats', 'driver.driverProfile', 'vehicle', 'fromCity', 'toCity'])
             ->boostedFirst()
             ->orderBy('departure_at')
             ->limit($limit)
@@ -167,7 +171,7 @@ class RideMatchService
             ->where('from_city_id', $ride->from_city_id)
             ->where('to_city_id', $ride->to_city_id)
             ->open()
-            ->whereRaw('? BETWEEN DATE_SUB(wanted_date, INTERVAL flexible_days DAY) AND DATE_ADD(wanted_date, INTERVAL flexible_days DAY)', [$ride->departure_at->toDateString()])
+            ->whereRaw('? BETWEEN DATE_SUB(wanted_date, INTERVAL flexible_days DAY) AND DATE_ADD(wanted_date, INTERVAL flexible_days DAY)', [LocalTime::toLocal($ride->departure_at)->toDateString()])
             ->update([
                 'status'          => 'fulfilled',
                 'matched_ride_id' => $ride->id,

@@ -185,7 +185,7 @@
                   @foreach ($rides as $ride)
                     <tr>
                       <td><strong>{{ $ride->fromCity?->name }} → {{ $ride->toCity?->name }}</strong></td>
-                      <td class="nowrap small">{{ $ride->departure_at?->format('d.m.Y H:i') }}</td>
+                      <td class="nowrap small">{{ $ride->departureLocal()?->format('d.m.Y H:i') }}</td>
                       <td class="num">{{ $ride->booked_seats }}/{{ $ride->total_seats }}</td>
                       <td>@include('admin.partials.ride-status', ['status' => $ride->status])</td>
                       <td class="actions"><a href="{{ route('admin.rides.show', $ride) }}" class="btn btn--ghost btn--sm">Bax</a></td>
@@ -214,7 +214,7 @@
                   @foreach ($bookings as $booking)
                     <tr>
                       <td><strong>{{ $booking->ride?->fromCity?->name }} → {{ $booking->ride?->toCity?->name }}</strong></td>
-                      <td class="nowrap small">{{ $booking->ride?->departure_at?->format('d.m.Y H:i') }}</td>
+                      <td class="nowrap small">{{ $booking->ride?->departureLocal()?->format('d.m.Y H:i') }}</td>
                       <td class="num">{{ $booking->seats }}</td>
                       <td>@include('admin.partials.booking-status', ['status' => $booking->status])</td>
                       <td class="actions"><a href="{{ route('admin.bookings.show', $booking) }}" class="btn btn--ghost btn--sm">Bax</a></td>

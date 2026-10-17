@@ -9,6 +9,7 @@ use App\Models\Ride;
 use App\Services\BookingService;
 use App\Services\ReferralService;
 use App\Services\RideMatchService;
+use App\Support\LocalTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -80,7 +81,8 @@ class RideController extends Controller
             )
             ->when(
                 ! empty($filters['date']),
-                fn ($q) => $q->whereDate('departure_at', $filters['date'])
+                // Bakı günü, UTC günü yox — bax `LocalTime::dayRange`.
+                fn ($q) => $q->whereBetween('departure_at', LocalTime::dayRange($filters['date']))
             )
             ->when(
                 ! empty($filters['driver_gender']),
@@ -196,11 +198,18 @@ class RideController extends Controller
 
         $data['women_only'] = (bool) ($data['women_only'] ?? false);
 
+        // Ofsetli və ya ofsetsiz (köhnə tətbiq, Bakı saatı) — hər ikisi eyni UTC
+        // anına çevrilir (bax `LocalTime::parse`). `after:now` ofsetsiz sətri
+        // UTC kimi oxuyur və Bakıda artıq keçmiş vaxtı buraxa bilərdi, ona görə
+        // yoxlama çevrilmiş vaxtla bir də aparılır.
+        $departure = LocalTime::parse($data['departure_at']);
+        abort_unless($departure->isFuture(), 422, 'Yola düşmə vaxtı gələcəkdə olmalıdır.');
+
         $first = null;
 
         for ($week = 0; $week < $weeks; $week++) {
             $row = $data;
-            $row['departure_at'] = Carbon::parse($data['departure_at'])->addWeeks($week);
+            $row['departure_at'] = $departure->copy()->addWeeks($week);
 
             // `boosted_until` `fillable` deyil (bax `Ride`), ona görə `create()`
             // massivinin içində səssizcə atılırdı və heç bir elan boost
@@ -262,8 +271,12 @@ class RideController extends Controller
         $weeks = (int) ($data['repeat_weeks'] ?? 1);
         $first = null;
 
+        // `store` ilə eyni çevirmə və eyni yoxlama.
+        $start = LocalTime::parse($data['departure_at']);
+        abort_unless($start->isFuture(), 422, 'Yola düşmə vaxtı gələcəkdə olmalıdır.');
+
         for ($week = 0; $week < $weeks; $week++) {
-            $departure = Carbon::parse($data['departure_at'])->addWeeks($week);
+            $departure = $start->copy()->addWeeks($week);
 
             $copy = $user->rides()->make([
                 'vehicle_id'      => $ride->vehicle_id,
@@ -294,7 +307,7 @@ class RideController extends Controller
             ->setStatusCode(201);
     }
 
-    public function update(Request $request, Ride $ride, RideMatchService $matcher)
+    public function update(Request $request, Ride $ride, RideMatchService $matcher, ReferralService $referrals)
     {
         $user = $request->user();
 
@@ -330,9 +343,23 @@ class RideController extends Controller
             );
         }
 
+        if (isset($data['departure_at'])) {
+            // `store` ilə eyni çevirmə və eyni yoxlama.
+            $data['departure_at'] = LocalTime::parse($data['departure_at']);
+            abort_unless($data['departure_at']->isFuture(), 422, 'Yola düşmə vaxtı gələcəkdə olmalıdır.');
+        }
+
         $seatsBefore = $ride->seats_left;
 
         $ride->update($data);
+
+        // Boost elanın yola düşmə vaxtında bitir. Vaxt dəyişəndə köhnə sərhəd
+        // qalsaydı, sonraya çəkilmiş elan yola düşməmiş boost-u itirərdi.
+        if (isset($data['departure_at'])) {
+            $ride->forceFill([
+                'boosted_until' => $referrals->boostFor($user, $ride->departure_at),
+            ])->save();
+        }
 
         // Yer sayı artdısa və ya tarix dəyişdisə, elan əvvəl uyğun gəlməyən
         // sərnişinlərə indi uyğun gələ bilər. `notifyWaitingPassengers` özü

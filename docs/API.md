@@ -61,6 +61,13 @@ JSON yerinə HTML redirect qaytarır.
 > Klient hər iki halı idarə etməlidir.
 
 **Tarixlər** — bütün tarix sahələri ISO 8601 (`2026-09-15T14:30:00+04:00`).
+
+Server vaxtı **UTC**-də saxlayır və cavabda UTC ilə qaytarır
+(`2026-10-18T05:00:00+00:00`) — klient onu yerli saata çevirib göstərir.
+Klient vaxt göndərəndə **ofseti mütləq yazmalıdır** (`…Z` və ya `…+04:00`).
+Ofsetsiz vaxt (`2026-10-18T09:00:00`) Bakı saatı (`Asia/Baku`) sayılır — bu,
+tətbiqin köhnə versiyaları üçün saxlanılıb, yeni klient ona güvənməməlidir.
+Yalnız tarix olan sahələr (`date`, `wanted_date`) Bakı təqvim günüdür.
 Yalnız `searched_date` `YYYY-MM-DD` formatındadır.
 
 ---
@@ -1288,11 +1295,12 @@ açılmır.
 `is_verified` ilə eyni qayda: `driverProfile` yüklənibsə gəlir, yüklənməyibsə
 **açar ümumiyyətlə olmur** (§16.5) — "bilinmir" `false` deyil.
 
-| Gəlir (`driver` sahəsində) | Gəlmir (açar yoxdur) |
+| Gəlir | Gəlmir (açar yoxdur) |
 |---|---|
-| `GET /rides`, `GET /rides/{id}`, `POST /rides`, `PUT /rides/{id}`, `POST /rides/{id}/repeat` | tələb elanı cavabındakı `matches` |
-| `GET /bookings`, `GET /bookings/{id}`, `POST /rides/{id}/bookings` | `GET /conversations` → `other_user` |
-| | `GET /users/{id}`, rəy `author`, bildiriş `actor` |
+| `GET /rides`, `GET /rides/{id}`, `POST /rides`, `PUT /rides/{id}`, `POST /rides/{id}/repeat` (`driver`) | `GET /conversations` → `other_user` |
+| `GET /bookings`, `GET /bookings/{id}`, `POST /rides/{id}/bookings` (`driver`) | rəy `author`, bildiriş `actor` |
+| tələb elanı cavabındakı `matches` (`driver`) | |
+| `GET /users/{id}` (ictimai profil) | |
 
 ### Sıralama
 

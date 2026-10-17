@@ -80,7 +80,7 @@
               <td class="num muted">{{ $ride->id }}</td>
               <td><strong>{{ $ride->fromCity?->name }} → {{ $ride->toCity?->name }}</strong></td>
               <td>@include('admin.partials.user', ['user' => $ride->driver])</td>
-              <td class="nowrap small">{{ $ride->departure_at?->format('d.m.Y H:i') }}</td>
+              <td class="nowrap small">{{ $ride->departureLocal()?->format('d.m.Y H:i') }}</td>
               <td class="num">{{ $ride->booked_seats }}/{{ $ride->total_seats }}</td>
               <td class="num nowrap">{{ number_format((float) $ride->price_per_seat, 2) }} ₼</td>
               <td class="num">{{ $ride->bookings_count }}</td>

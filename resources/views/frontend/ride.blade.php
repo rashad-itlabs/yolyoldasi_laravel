@@ -10,7 +10,7 @@
       : ($parts[0] ?? 'Sürücü');
 
   $route   = $ride->fromCity->name.' → '.$ride->toCity->name;
-  $when    = $ride->departure_at->translatedFormat('d F, H:i');
+  $when    = $ride->departureLocal()->translatedFormat('d F, H:i');
   $price   = rtrim(rtrim(number_format((float) $ride->price_per_seat, 2, '.', ''), '0'), '.');
   // `stats` sətri olmaya bilər (çox köhnə hesab) — `?->` olmadan bu sətir
   // səhifəni tamamilə sındırardı.

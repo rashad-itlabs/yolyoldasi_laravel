@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\LocalTime;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Ride extends Model
 {
@@ -87,6 +89,16 @@ class Ride extends Model
     public function scopeUpcoming($query)
     {
         return $query->where('departure_at', '>=', now());
+    }
+
+    /**
+     * Yola düşmə vaxtı Bakı saatı ilə — admin panelində və saytın paylaşım
+     * səhifəsində göstərmək üçün. Sütun UTC-dədir (bax `LocalTime`); birbaşa
+     * `departure_at->format()` Bakıda 4 saat erkən vaxt yazardı.
+     */
+    public function departureLocal(): ?Carbon
+    {
+        return LocalTime::toLocal($this->departure_at);
     }
 
     public function getIsBoostedAttribute(): bool

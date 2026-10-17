@@ -97,7 +97,7 @@
                   {{ $booking->ride->fromCity?->name }} → {{ $booking->ride->toCity?->name }}
                 </a></dd>
               </div>
-              <div class="row"><dt>Yola düşmə</dt><dd>{{ $booking->ride->departure_at?->format('d.m.Y H:i') }}</dd></div>
+              <div class="row"><dt>Yola düşmə</dt><dd>{{ $booking->ride->departureLocal()?->format('d.m.Y H:i') }}</dd></div>
               <div class="row"><dt>Status</dt><dd>@include('admin.partials.ride-status', ['status' => $booking->ride->status])</dd></div>
               <div class="row"><dt>Avtomobil</dt>
                 <dd>
