@@ -104,19 +104,15 @@ class ReferralService
     /**
      * Sürücünün boost ehtiyatından yeni elana düşən pay.
      *
-     * Elanın `boosted_until`-i sürücünün ehtiyatı ilə elanın yola düşmə vaxtı
-     * arasından kiçiyidir: yola düşmüş elanı axtarışın başında saxlamağın
-     * mənası yoxdur, o onsuz da siyahıdan çıxır.
+     * Ehtiyat artıq təkcə dəvət mükafatı deyil: PRO sürücünün elanları da
+     * başda çıxır, və ikisindən hansı gec bitirsə, o götürülür. Hesab özü
+     * `DriverProfile::boostedUntilFor`-dadır, çünki eyni qaydanı PRO dəyişəndə
+     * mövcud elanlara `ProService::reboost` da tətbiq edir. Metod burada
+     * qalır ki, `RideController`-in çağırışı dəyişməsin.
      */
     public function boostFor(User $driver, \DateTimeInterface $departureAt): ?\Illuminate\Support\Carbon
     {
-        $until = $driver->driverProfile?->boost_until;
-
-        if (! $until || $until->isPast()) {
-            return null;
-        }
-
-        return $until->lessThan($departureAt) ? $until : \Illuminate\Support\Carbon::parse($departureAt);
+        return $driver->driverProfile?->boostedUntilFor($departureAt);
     }
 
     /** "Dostunu dəvət et" ekranının məlumatı. */

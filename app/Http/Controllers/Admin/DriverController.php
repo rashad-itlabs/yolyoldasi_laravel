@@ -7,6 +7,7 @@ use App\Models\AdminActivityLog;
 use App\Models\DriverProfile;
 use App\Models\VerificationDocument;
 use App\Services\NotificationService;
+use App\Services\ProService;
 use App\Support\DriverVerification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,8 +16,10 @@ use Illuminate\Support\Facades\Storage;
 
 class DriverController extends Controller
 {
-    public function __construct(private NotificationService $notifications)
-    {
+    public function __construct(
+        private NotificationService $notifications,
+        private ProService $pro,
+    ) {
     }
 
     public function index(Request $request)
@@ -198,6 +201,53 @@ class DriverController extends Controller
         });
 
         return back()->with('success', 'Sürücü rədd edildi.');
+    }
+
+    /**
+     * PRO verir və ya uzadır — qalan müddətin üstünə gəlinir.
+     *
+     * Sənəd statusu yoxlanılmır: sürücünün özü sınağı yalnız təsdiqdən sonra
+     * başlada bilər, admin isə istisna edə bilməlidir. Elanların boost-u
+     * `ProService` daxilində dərhal yenilənir.
+     */
+    public function grantPro(DriverProfile $driver)
+    {
+        $before = $driver->isPro() ? $driver->pro_until : null;
+
+        DB::transaction(function () use ($driver, $before) {
+            $this->pro->grant($driver, ProService::GRANT_DAYS);
+
+            AdminActivityLog::record('driver.pro.granted', $driver, [
+                'user_id'   => $driver->user_id,
+                'days'      => ProService::GRANT_DAYS,
+                'from'      => $before?->toIso8601String(),
+                'pro_until' => $driver->pro_until->toIso8601String(),
+            ]);
+        });
+
+        return back()->with('success', 'PRO '.$driver->pro_until->format('d.m.Y').' tarixinədək aktivdir.');
+    }
+
+    /**
+     * PRO-nu dərhal bitirir. PRO-nun verdiyi boost elanlardan çıxır, dəvət
+     * mükafatı varsa qalır; sınaq yenidən açılmır (bax `ProService::revoke`).
+     */
+    public function revokePro(DriverProfile $driver)
+    {
+        abort_unless($driver->isPro(), 422, 'Bu sürücünün aktiv PRO-su yoxdur.');
+
+        $before = $driver->pro_until;
+
+        DB::transaction(function () use ($driver, $before) {
+            $this->pro->revoke($driver);
+
+            AdminActivityLog::record('driver.pro.revoked', $driver, [
+                'user_id'   => $driver->user_id,
+                'pro_until' => $before->toIso8601String(),
+            ]);
+        });
+
+        return back()->with('success', 'PRO ləğv edildi.');
     }
 
     /**

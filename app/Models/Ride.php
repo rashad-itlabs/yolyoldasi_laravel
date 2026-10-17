@@ -14,9 +14,10 @@ class Ride extends Model
 
     /*
      | `boosted_until` qəsdən `fillable` deyil — dəyəri yalnız `RideController`
-     | sürücünün qazandığı ehtiyatdan götürüb yazır. Kütləvi doldurmaya açıq
-     | olsa, `POST /rides` sorğusuna əl ilə əlavə edilmiş bir sahə istənilən
-     | elanı axtarışın başına çıxarardı.
+     | (yeni elan) və `ProService::reboost` (PRO dəyişəndə mövcud elanlar)
+     | sürücünün ehtiyatından götürüb `forceFill` ilə yazır. Kütləvi doldurmaya
+     | açıq olsa, `POST /rides` sorğusuna əl ilə əlavə edilmiş bir sahə
+     | istənilən elanı axtarışın başına çıxarardı.
      */
 
     protected $casts = [

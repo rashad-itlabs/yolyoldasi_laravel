@@ -76,6 +76,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('documents/{document}/reject', [DriverController::class, 'rejectDocument'])->name('documents.reject');
         Route::get('documents/{document}/file/{side?}', [DriverController::class, 'document'])->name('documents.file');
 
+        // Sürücü PRO-su. Ödəniş qatı yoxdur — sınaqdan başqa PRO-nu yalnız
+        // admin verir. Ləğv də `POST`-dur: sətir silinmir, müddət bitir.
+        Route::post('drivers/{driver}/pro/grant', [DriverController::class, 'grantPro'])->name('drivers.pro.grant');
+        Route::post('drivers/{driver}/pro/revoke', [DriverController::class, 'revokePro'])->name('drivers.pro.revoke');
+
         /* Səfərlər */
         Route::get('rides', [RideController::class, 'index'])->name('rides.index');
         Route::get('rides/{ride}', [RideController::class, 'show'])->name('rides.show');

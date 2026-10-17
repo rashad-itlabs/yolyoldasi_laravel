@@ -36,8 +36,8 @@ class RideResource extends JsonResource
             // uyğun olmayan istifadəçiyə bron düyməsini açmır.
             'women_only' => (bool) $this->women_only,
 
-            // Dəvət mükafatı ilə axtarışın başına çıxmış elan. Klientə göndərilir
-            // ki, sürücü öz elanında mükafatın işlədiyini görsün.
+            // Dəvət mükafatı və ya PRO ilə axtarışın başına çıxmış elan. Klientə
+            // göndərilir ki, sürücü öz elanında boost-un işlədiyini görsün.
             'is_boosted' => $this->is_boosted,
 
             // Paylaşma linki. Yol razılaşmaları Azərbaycanda hələ də WhatsApp

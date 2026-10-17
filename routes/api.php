@@ -113,6 +113,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/driver/documents', [DriverController::class, 'documents']);
         Route::post('/driver/documents', [DriverController::class, 'uploadDocument']);
 
+        // Pulsuz PRO sınağı — hesab başına bir dəfə, yalnız təsdiqlənmiş
+        // sürücü. Ödəniş yoxdur; admin paneli də PRO verə/ləğv edə bilir.
+        Route::post('/driver/pro/trial', [DriverController::class, 'startProTrial']);
+
         /* Avtomobillər */
         Route::get('/vehicles', [VehicleController::class, 'index']);
         Route::post('/vehicles', [VehicleController::class, 'store']);

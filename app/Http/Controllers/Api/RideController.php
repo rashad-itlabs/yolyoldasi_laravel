@@ -201,9 +201,14 @@ class RideController extends Controller
         for ($week = 0; $week < $weeks; $week++) {
             $row = $data;
             $row['departure_at'] = Carbon::parse($data['departure_at'])->addWeeks($week);
-            $row['boosted_until'] = $referrals->boostFor($user, $row['departure_at']);
 
-            $ride = $user->rides()->create($row);
+            // `boosted_until` `fillable` deyil (bax `Ride`), ona görə `create()`
+            // massivinin içində səssizcə atılırdı və heç bir elan boost
+            // almırdı. `make()` + `forceFill()` eyni bir INSERT-dir.
+            $ride = $user->rides()->make($row);
+            $ride->forceFill([
+                'boosted_until' => $referrals->boostFor($user, $row['departure_at']),
+            ])->save();
             $first ??= $ride;
 
             // Bu marşrutu gözləyən sərnişinlərə xəbər. Tələb elanı sisteminin
@@ -260,7 +265,7 @@ class RideController extends Controller
         for ($week = 0; $week < $weeks; $week++) {
             $departure = Carbon::parse($data['departure_at'])->addWeeks($week);
 
-            $copy = $user->rides()->create([
+            $copy = $user->rides()->make([
                 'vehicle_id'      => $ride->vehicle_id,
                 'from_city_id'    => $ride->from_city_id,
                 'to_city_id'      => $ride->to_city_id,
@@ -272,8 +277,12 @@ class RideController extends Controller
                 'dropoff_point'   => $ride->dropoff_point,
                 'instant_booking' => $ride->instant_booking,
                 'women_only'      => $ride->women_only,
-                'boosted_until'   => $referrals->boostFor($user, $departure),
             ]);
+
+            // `store()`-dakı səbəbdən ayrıca — `create()` bu sahəni atırdı.
+            $copy->forceFill([
+                'boosted_until' => $referrals->boostFor($user, $departure),
+            ])->save();
 
             $first ??= $copy;
             $matcher->notifyWaitingPassengers($copy);

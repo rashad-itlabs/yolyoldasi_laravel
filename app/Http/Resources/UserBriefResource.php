@@ -30,6 +30,14 @@ class UserBriefResource extends JsonResource
                 fn () => $this->driverProfile?->status === 'approved'
             ),
 
+            // PRO sürücü nişanı. `is_verified` ilə eyni qayda: əlaqə
+            // yüklənməyibsə açar yoxdur — "bilinmir" `false` deyil. Ayrıca
+            // eager-load lazım deyil, `driverProfile` yüklənən hər yerdə gəlir.
+            'is_pro' => $this->whenLoaded(
+                'driverProfile',
+                fn () => (bool) $this->driverProfile?->isPro()
+            ),
+
             'stats' => $this->whenLoaded('stats', fn () => [
                 'driver_rating'          => (float) $this->stats->driver_rating,
                 'driver_review_count'    => $this->stats->driver_review_count,

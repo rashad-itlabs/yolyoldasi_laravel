@@ -156,6 +156,54 @@
           </dl>
         </div>
       </div>
+
+      {{-- PRO: ödəniş qatı yoxdur — sınaqdan başqa yeganə yol bu kartdır. --}}
+      @php $isPro = $driver->isPro(); @endphp
+      <div class="card">
+        <div class="card__head">
+          <h2>PRO</h2>
+          <span class="badge {{ $isPro ? 'badge--mint' : 'badge--grey' }}">{{ $isPro ? 'Aktiv' : 'Aktiv deyil' }}</span>
+        </div>
+        <div class="card__body">
+          <dl class="rows">
+            <div class="row"><dt>Bitmə</dt>
+              <dd>
+                @if ($isPro)
+                  {{ $driver->pro_until->format('d.m.Y H:i') }}
+                @elseif ($driver->pro_until)
+                  <span class="muted">Bitib · {{ $driver->pro_until->format('d.m.Y') }}</span>
+                @else
+                  —
+                @endif
+              </dd>
+            </div>
+            <div class="row"><dt>Pulsuz sınaq</dt>
+              <dd>
+                @if ($driver->pro_trial_used_at)
+                  İstifadə olunub · {{ $driver->pro_trial_used_at->format('d.m.Y') }}
+                @else
+                  <span class="muted">İstifadə olunmayıb</span>
+                @endif
+              </dd>
+            </div>
+          </dl>
+
+          <div class="btn-row" style="margin-top:11px">
+            <form method="POST" action="{{ route('admin.drivers.pro.grant', $driver) }}" class="inline">
+              @csrf
+              <button class="btn btn--primary btn--sm" type="submit">+{{ \App\Services\ProService::GRANT_DAYS }} gün PRO</button>
+            </form>
+
+            @if ($isPro)
+              <form method="POST" action="{{ route('admin.drivers.pro.revoke', $driver) }}" class="inline"
+                    data-confirm="PRO dərhal ləğv edilsin? Sürücünün elanları axtarışın başından düşəcək (dəvət mükafatı varsa, o qalır).">
+                @csrf
+                <button class="btn btn--danger btn--sm" type="submit">PRO-nu ləğv et</button>
+              </form>
+            @endif
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>

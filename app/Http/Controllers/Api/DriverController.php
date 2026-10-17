@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\VehicleResource;
+use App\Models\DriverProfile;
 use App\Models\VerificationDocument;
+use App\Services\ProService;
 use App\Support\DriverVerification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,10 +14,32 @@ use Illuminate\Support\Facades\Storage;
 
 class DriverController extends Controller
 {
+    public function __construct(private ProService $pro)
+    {
+    }
+
     public function profile(Request $request)
     {
-        $user    = $request->user();
-        $profile = $user->driverProfile()->firstOrCreate([]);
+        $profile = $request->user()->driverProfile()->firstOrCreate([]);
+
+        return $this->profileResponse($profile);
+    }
+
+    /**
+     * Pulsuz PRO sınağını başladır.
+     *
+     * Cavab `GET /driver/profile` ilə eyni gövdədir ki, klient ekranı ikinci
+     * sorğu etmədən yeniləsin (`PUT /me/mode` ilə eyni yanaşma). Qaydalar və
+     * xətalar `ProService::startTrial`-dadır.
+     */
+    public function startProTrial(Request $request)
+    {
+        return $this->profileResponse($this->pro->startTrial($request->user()));
+    }
+
+    /** `GET /driver/profile` gövdəsi — profil və PRO sınağı cavabları bunu paylaşır. */
+    private function profileResponse(DriverProfile $profile)
+    {
         $profile->load(['vehicle', 'documents']);
 
         return response()->json([
@@ -29,6 +53,9 @@ class DriverController extends Controller
                     ? (new VehicleResource($profile->vehicle))->withPlate(true)
                     : null,
                 'documents'               => $this->documentMap($profile),
+
+                // Sürücü PRO-su — aktivdirmi, nə vaxtadək, sınaq qalıbmı.
+                'pro' => $this->pro->summary($profile),
             ],
         ]);
     }
