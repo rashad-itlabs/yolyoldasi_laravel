@@ -14,7 +14,10 @@ class UserResource extends JsonResource
             'phone'              => $this->phone,
             'phone_verified_at'  => $this->phone_verified_at?->toIso8601String(),
             'full_name'          => $this->full_name,
-            'photo_url'          => $this->photo_url,
+            // Həmişə tam URL (API.md §1). Köhnə yükləmələr bazada nisbi yolla
+            // (`/storage/avatars/…`) qalıb və tətbiq onu yükləyə bilmirdi —
+            // `url()` nisbi yolu domenlə tamamlayır, tam URL-ə toxunmur.
+            'photo_url'          => $this->photo_url ? url($this->photo_url) : null,
             'about'              => $this->about,
             'gender'             => $this->gender,
             'birth_year'         => $this->birth_year,

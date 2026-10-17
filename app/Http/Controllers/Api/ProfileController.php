@@ -90,7 +90,11 @@ class ProfileController extends Controller
         }
 
         $path = $request->file('photo')->store('avatars', 'public');
-        $user->update(['photo_url' => Storage::url($path)]);
+
+        // `public` diskin URL-i, `Storage::url()` yox: o, standart (`local`)
+        // diskə baxır və nisbi `/storage/…` qaytarır — tətbiq onu şəkil kimi
+        // yükləyə bilmirdi. `public` diskin `url`-i tam domenlidir.
+        $user->update(['photo_url' => Storage::disk('public')->url($path)]);
 
         return new UserResource($user);
     }

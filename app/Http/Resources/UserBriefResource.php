@@ -12,7 +12,8 @@ class UserBriefResource extends JsonResource
         return [
             'id'                 => $this->id,
             'full_name'          => $this->full_name,
-            'photo_url'          => $this->photo_url,
+            // Tam URL — bax `UserResource`.
+            'photo_url'          => $this->photo_url ? url($this->photo_url) : null,
             'gender'             => $this->gender,
             'birth_year'         => $this->birth_year,
             'has_driver_profile' => (bool) $this->has_driver_profile,
