@@ -35,6 +35,7 @@ class UserController extends Controller
                 $query->where(function ($inner) use ($q) {
                     $inner->where('full_name', 'like', "%{$q}%")
                         ->orWhere('phone', 'like', "%{$q}%")
+                        ->orWhere('email', 'like', "%{$q}%")
                         ->orWhere('id', $q);
                 });
             })

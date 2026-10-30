@@ -1,7 +1,8 @@
 {{-- İstifadəçi hücrəsi. $user null ola bilər (silinmiş sətirlər üçün). --}}
 @php
   $link = $link ?? true;
-  $sub  = $sub ?? ($user?->phone);
+  // Sayt hesabının telefonu yoxdur — onda e-poçt göstərilir.
+  $sub  = $sub ?? ($user?->phone ?? $user?->email);
 @endphp
 
 @if (! $user)

@@ -95,6 +95,11 @@
 
     <div class="nav__actions">
       <a href="{{ route('contact') }}" class="btn btn--ghost">Əlaqə</a>
+      @auth('web')
+        <a href="{{ route('account') }}" class="btn btn--ghost">Hesabım</a>
+      @else
+        <a href="{{ route('login') }}" class="btn btn--ghost">Daxil ol</a>
+      @endauth
       <a href="{{ $section('yukle') }}" class="btn btn--brand">Tətbiqi yüklə</a>
       <button class="nav__burger" id="burger" aria-label="Menyu" aria-expanded="false" aria-controls="mobileMenu">
         <span></span><span></span><span></span>
@@ -112,6 +117,11 @@
   <a href="{{ $section('faq') }}">FAQ</a>
   <a href="{{ route('about') }}">Haqqımızda</a>
   <a href="{{ route('contact') }}">Əlaqə</a>
+  @auth('web')
+    <a href="{{ route('account') }}">Hesabım</a>
+  @else
+    <a href="{{ route('login') }}">Daxil ol</a>
+  @endauth
   <a href="{{ $section('yukle') }}" class="btn btn--brand btn--lg">Tətbiqi yüklə</a>
 </nav>
 

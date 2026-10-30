@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('title', $user->full_name ?: 'Adsız istifadəçi')
-@section('subtitle', '#'.$user->id.' · '.$user->phone)
+@section('subtitle', '#'.$user->id.' · '.($user->phone ?? $user->email))
 
 @section('actions')
   <a href="{{ route('admin.users.index') }}" class="btn btn--ghost btn--sm">Siyahıya qayıt</a>
@@ -73,7 +73,17 @@
         <div class="card__head"><h2>Profil</h2></div>
         <div class="card__body">
           <dl class="rows">
-            <div class="row"><dt>Telefon</dt><dd class="mono">{{ $user->phone }}</dd></div>
+            @if ($user->email)
+              <div class="row"><dt>E-poçt</dt>
+                <dd>
+                  {{ $user->email }}
+                  @if ($user->email_verified_at)
+                    <span class="badge badge--green">təsdiqlənib</span>
+                  @endif
+                </dd>
+              </div>
+            @endif
+            <div class="row"><dt>Telefon</dt><dd class="mono">{{ $user->phone ?? '—' }}</dd></div>
             <div class="row"><dt>Telefon təsdiqi</dt>
               <dd>
                 @if ($user->phone_verified_at)

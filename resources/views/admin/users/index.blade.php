@@ -85,6 +85,9 @@
                   <span class="badge badge--grey">Silinib</span>
                 @elseif ($user->is_blocked)
                   <span class="badge badge--red">Bloklu</span>
+                @elseif (! $user->phone && $user->email)
+                  {{-- Saytda e-poçtla açılıb; telefonu yoxdur, "təsdiqsiz nömrə" deyil. --}}
+                  <span class="badge badge--blue">Sayt hesabı</span>
                 @elseif (! $user->phone_verified_at)
                   <span class="badge badge--amber">Təsdiqsiz</span>
                 @else

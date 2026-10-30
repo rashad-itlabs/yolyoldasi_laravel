@@ -36,9 +36,15 @@ class User extends Authenticatable
      | kodu server verir, dəvəti isə yalnız `AuthController` qeydiyyat anında
      | bağlayır. `PATCH /me` ilə dəyişdirilə bilsəydi, istifadəçi öz kodunu
      | başqasınınkı ilə əvəz edib mükafatı oğurlaya bilərdi.
+     |
+     | `email`, `email_verified_at` və `password` də kənardadır: onları yalnız
+     | saytın `Web\AuthController`-i kod təsdiqləndikdən sonra yazır. `PATCH /me`
+     | ilə açıq olsaydılar, tətbiq hesabına təsdiqsiz e-poçt və şifrə qoyub onu
+     | saytdan ələ keçirmək olardı.
      */
 
     protected $hidden = [
+        'password',
         'remember_token',
     ];
 
@@ -46,6 +52,8 @@ class User extends Authenticatable
     {
         return [
             'phone_verified_at'   => 'datetime',
+            'email_verified_at'   => 'datetime',
+            'password'            => 'hashed',
             'blocked_at'          => 'datetime',
             'onesignal_linked_at'  => 'datetime',
             'referred_at'          => 'datetime',
